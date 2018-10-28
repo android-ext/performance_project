@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">HttpProcessor</string>
+
+    <string name="volley_btn_click">volley网络请求</string>
+    <string name="okhttp_btn_click">okhttp网络请求</string>
+
+    <string name="request_error_txt">请求数据为空</string>
+</resources>

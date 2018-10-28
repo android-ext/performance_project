@@ -1,0 +1,7 @@
+include ':splash',
+        ':installApk',
+        ':render',
+        ':android_h5',
+        ':dn_mvp',
+        ':http_processor'
+

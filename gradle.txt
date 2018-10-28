@@ -1,0 +1,323 @@
+【打印版本号】
+gradle -v
+
+第一个gradle版的Hello World!
+task hello {
+  doLast {
+    println 'Hello World!'
+  }
+}
+运行: gradle -q hello
+
+执行gradle 命名的时候回默认加载当前目录下的build.gradle脚本文件。这句话是构建脚本定义一个任务，名字叫hello，并且给任务hello添加了一个动作，官方名字叫Action,其实就是一段Groovy语言实现的闭包。doLast意味着在Task执行完毕之后要回调doLast的这部分闭包的代码实现。-q参数控制gradle输出的日志级别，以及哪些日志可以输出被看到。
+
+
+【gradle wrapper】
+
+提供内置的wrapper task帮助我们自动生成wapper所需的目录文件。我们也可以自定义wapper task
+task wrapper(type: Wrappper) {
+  gradleVersion = '4.4'
+  archiveBase = 'GRADLE_USER_HOME'
+  archivePath = 'wrapper/dists'
+  distributionBase = 'GRADLE_USER_HOME'
+  distributionPath = 'wrapper/dists'
+  distributionUrl = 'http\://servces.gradle.org/distributions/gradle-4.4-all.zip'
+}  
+
+日志级别
+ERROR     错误消息
+QUITE     重要消息
+WARNING   警告信息
+LIFECYCLE 进度消息
+INFO      信息消息
+DEBUG     调试消息
+
+【输出错误堆栈信息】
+-s | --stacktrace      输出关键性的堆栈信息
+-S | --full-stacktrace 输出全部堆栈信息
+prinlt 也可以使用logger.quite|error|warn|info|lifecycle|debug()
+
+【常用命令】
+使用帮助
+./gradlew -?|-h|-help
+
+查看所有可执行的tasks
+./gradlew tasks
+
+了解每一个task的使用帮助
+./gradlew help -task [任务名称(tasks)]
+
+强制刷新依赖
+./gradlew --refresh-dependencies assemble
+
+
+【Groovy基础】
+字符串 ''|""
+''没有运算能力
+""具有运算能力
+
+task printStringVar << {
+  def name = "张三"
+
+  println '单引号的变量计算:${name}'
+  println "双引号的变量计算:${name}"
+}
+只有一个变量的时候可以省略花括号
+
+【集合】
+List
+def numList = [1, 2, 3, 4]
+numList[i]
+numList.each {
+  println it
+}
+it代表正在迭代的元素，类似this
+Map
+def map = ['width':1024, 'height':768]
+map['width']
+map.each {
+  println "key:${it.key}, value:${it.value}
+}
+
+【方法】
+task invokeMethod << {
+  method(1, 2)
+  method 1, 5
+}
+def method(int a, int b) {
+  println a + b
+}
+可以省略(), 定义有返回值的方法时，return不是必须的。当没有return时，Groovy会把方法执行过程中的最后一句代码作为其返回值。
+
+代码块可以作为参数传递，也就是闭包
+集合的each方法为例
+numList.each({
+  println it
+})
+// Groovy规定，如果方法的最后一个参数是闭包，可以放到方法外面
+numList.each() {
+  println it
+}
+// 然后括号可以省略，就变成我们经常看到的样式
+numList.each {
+  println it
+}
+
+【闭包参数传递】
+task hellClosure << {
+  // 多个参数
+  eachMap { k, v ->
+      println "${k} is ${v}"
+  }
+}
+
+def eachMap(closure) {
+  def map = ["name":"张三", "age":18]
+  map.each {
+      closure(it.key, it.value)
+  }
+}
+
+【闭包委托】
+task configClosure << {
+  person {
+    name = "张三"
+    age = 18
+    dumpPerson()
+  }
+}
+class Person {
+  String name
+  int age
+
+  def dumpPerson(Closure<Person> closure) {
+    Person p = new Person()
+    closure.delegate = p
+    closure.setResolveStrategy(closure.DELEGATE_FIRST)
+    closure(p)
+  }
+}
+在使用person方法创建一个Person实例时， 可以在闭包里直接对该Person实例配置委托对象为当前创建的Person实例
+
+【gradle构建基础】
+subprojectes和allprojects是两个方法，接受一个闭包作为参数，对工程进行遍历，遍历的过程中调用我们自定义的闭包，所以我们可以在闭包里配置、打印、输出或修改Project的属性都可以
+
+【多种方式创建任务】
+def Task customTask = task(customTask)
+customTask.doLast {
+  println "创建方法原型为:Task task(String name) throws InvalidUserDataException"
+}
+
+task customTask {
+  description '演示任务创建'
+  doFirst {
+    println "任务描述为: ${description}"
+    println "创建方法原型为: Task task(String name, Closure configrationClosure)"
+  }
+
+  doLast {
+    println 'customTas: doLast'
+  }
+}
+
+tasks.create("customTask") {
+  description '演示任务创建'
+  doFirst {
+    println 'customTask:doFirst'
+  }
+
+  doLast {
+    println "任务描述为: ${description}"
+    println "创建方法原型为: Task task(String name, Closure configrationClosure)"
+  }
+}
+
+【自定义属性】
+apply pugin: "java"
+// 自定义一个Project属性
+ext.age = 18
+// 通过代码块同时自定义多个属性
+ext {
+  phone = 15330272034
+  address = ''
+}
+
+sourceSets.all {
+  ext.resourcesDir = null
+}
+
+sourceSets {
+  main {
+    resourcesDir = 'main/res'
+  }
+  test {
+    resourcesDir = 'test/res'
+  }
+}
+
+task customProperty << {
+  println "年龄是: ${age}"
+  println "电话是: ${phone}"
+  println "地址是: ${address}"
+
+  sourceSets.each {
+    println "${it.name} 的resourcesDir是:${it.resourcesDir}"
+  }
+}
+
+【多种方式访问任务】
+首先, 我们创建的任务都会作为项目(Project)的一个属性，属性名就是任务名，我们就可以直接通过该任务名称访问和操纵该任务
+task accessTask
+accessTask.doLast {
+  println 'accessTask.doLast'
+}
+其次, 任务都是通过TaskContainer创建的，TaskContainer就是我们创建任务的集合，在Project中我们可以通过tasks属性访问TaskContainer，所以我们就可以以访问集合元素的方式访问我们创建的任务
+task accessTask
+tasks['accessTask'].doLast {
+  println 'accessTask.doLast'
+}
+[]在Groovy中是一个操作符，我们知道Groovy的操作符都有对应的方法让我们重载, a[b]对应的是a.getAt(b)这个方法,对应的例子tasks['accessTask']其实就是调用tasks.getAt('accessTask')这个方法。我们查看Gradle源代码的话,最后发现是调用findByName(String name)实现的。
+然后，就是通过路径访问。通过路径访问的方式有两种，一种是get，另一种是find,它们的区别在于get的时候如果找不到该任务就会抛出UnknownTaskException异常，而find在找不到任务的时候会返回null:
+task accessTask
+tasks['accessTask'].doLast {
+  println tasks.findByPath(':projectName:accessTask')
+  println tasks.getByPath(':projectName:accessTask')
+  println tasks.findByPath(':projectName:accessNotExistTask')
+}
+最后，就是通过名称访问。通过名字的访问也有get和find两种，它们的区别和路径访问方式一样:
+task accessTask
+tasks['accessTask'].doLast {
+  println tasks.findByName('accessTask')
+  println tasks.getByName('accessTask')
+  println tasks.findByName('accessNotExistTask')
+}
+值得强调的是，通过路径访问的时候，参数值可以是任务路径也可以是任务的名字。但是通过名字访问的时候，参数值只能是任务的名字，不能是路径。
+
+【任务分组和描述】
+def Task myTask = task groupTask
+myTask.group = BasePlugin.BUILD_GROUP
+myTask.description = '这是一个构建的引导任务'
+
+myTask.doLast {
+  println "group: ${group}, description: ${description}"
+}
+这样当我们通过./gradlew tasks查看任务信息的时候，就能看到该任务已经被归类到Build tasks分类里，并且可以看到该任务的描述信息。
+如果我们是基于Idea、Android Studio这类IDE开发的话，也能很清晰地看到任务的分类了。对了IDE，鼠标光标悬停到任务上，就可以看到该任务的描述。
+
+<<操作符
+<< 操作符在Gradle的Task上是doLast方法的短标记形式，在Groovy中是可以重载的，a<<b对应的是a.leftShift(b)
+
+任务的执行分析
+def Task myTask = task CustomTask(type: CustomTask)
+myTask.doFirst {
+  println 'Task执行之前执行in doFirst'
+}
+
+myTask.doLast {
+  println 'Task执行之后执行in doLast'
+}
+
+class CustomTask extends DefaultTask {
+  // 该方法被TaskAction注解标注，意思是该方法就是Task本身要执行的方法
+  @TaskAction
+  def doSelf() {
+    println 'Task自己本身在执行in doSelf'
+  }
+}
+
+任务排序
+taskB.shouldRunAfter(taskB) 表示taskB应该在taskA执行之后执行，这里的应该而不是必须。所以有可能任务顺序并不会按预设的执行
+taskB.mustRunAfter(taskA) 表示taskB必须在taskA执行之后执行，这个规则比较严格
+task orderTaskA << {
+  println 'orderTaskA'
+}
+task orderTaskB << {
+  println 'orderTaskB'
+}
+orderTaskA.mustRunAfter orderTaskB
+
+./gradlew orderTaskA orderTaskB
+
+任务的启用和禁用
+orderTaskA.enable = false
+
+任务的onlyIf断言
+假如我们的首发渠道是应用宝和百度，直接执行build会编译出来所有包，这个太慢也不符合我们的需求，现在我们就采用onlyIf的方式通过属性来控制
+final String BUILD_APPS_ALL = "all"
+final String BUILD_APPS_SHOUFA = "shoufa"
+final String BUILD_APPS_EXCLUDE_SHOUFA = "exclude_shoufa"
+
+task qqRelease << {
+   println "打应用宝的包"
+}
+
+task baiduRelease << {
+   println "打百度的包"
+}
+
+task huaweiRelease << {
+   println "打华为的包"
+}
+
+task build {
+   group BasePlugin.BUILD_GROUP
+   description "打渠道包"
+}
+
+build.dependsOn qqRelease, baiduRelease, huaweiRelease
+
+qqRelease.onlyIf {
+   def execute = false
+   if (project.jasProperty("build_apps")) {
+      Object buildApps = project.property("build_apps")
+      if(BUILD_APPS_SHOUFA.equal(buildApps) || BUILD_APPS_ALL.equals(buildApps)) {
+         execute = true
+      } else {
+         execute = false
+      }
+   }
+}
+
+
+
+

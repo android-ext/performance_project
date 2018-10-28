@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title></title>
+</head>
+<body>
+
+<div>
+    <input type="text" name="user_name" id="user_name"/>
+    <button id="transform_native">从native获取姓名</button>
+</div>
+
+<div>
+    <input type="text" name="user_favorite" id="user_favorite"/>
+    <button id="btn1">调用android有参参数</button>
+</div>
+<div>
+    <input type="button" id="submit_form" value="提交">
+</div>
+
+<div id="content"></div>
+
+</body>
+
+<script type="text/javascript">
+        // 跳转到 native 页面
+        document.getElementById("transform_native").onclick = function(){
+            // android对象名称，transformNative是android中的方法
+            window.location.href="protocol://android?code=transformNative";
+        };
+
+        // 从 native 页面输入的用户姓名
+        function inflateUserNameInput(value){
+            document.getElementById("user_name").value = value;
+        };
+
+        // 回传给 android 表单界面的数据
+        document.getElementById("submit_form").onclick = function(){
+            var name = document.getElementById("user_name").value;
+            var favorite = document.getElementById("user_favorite").value;
+            var json = {
+                user_name: name,
+                user_favorite: favorite
+                };
+            window.location.href="protocol://android?code=submitForm&data="+encodeURI(JSON.stringify(json),"utf-8");
+        };
+    </script>
+</html>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical">
+
+    <RelativeLayout
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:layout_marginTop="30dp">
+        <ImageView
+           android:id="@+id/left"
+           android:layout_width="150dp"
+           android:layout_height="150dp"
+           android:layout_marginLeft="5dp"
+           android:src="@drawable/kathryn"/>
+
+        <ImageView
+           android:layout_width="150dp"
+           android:layout_height="150dp"
+           android:layout_marginLeft="56dp"
+           android:src="@drawable/alex"/>
+
+        <ImageView
+           android:id="@+id/middle"
+           android:layout_width="150dp"
+           android:layout_height="150dp"
+           android:layout_marginLeft="105dp"
+           android:src="@drawable/claire"/>
+
+    </RelativeLayout>
+
+    <com.ext.render.DroidCardsView
+       android:layout_marginTop="30dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+</LinearLayout>

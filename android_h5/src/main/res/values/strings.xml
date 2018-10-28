@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">AndroidH5</string>
+
+    <string name="form_name">姓名:</string>
+    <string name="form_favorite">爱好:</string>
+
+    <string name="hint_text">请填写内容</string>
+
+    <string name="submit_text">提交内容</string>
+
+    <string name="transform_h5_btn_text">请求H5</string>
+</resources>
